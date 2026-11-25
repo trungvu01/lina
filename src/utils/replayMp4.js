@@ -178,7 +178,7 @@ function showReplayRateLimit(row, seconds) {
     title: '', duration: 0, showClose: true, offset: TOAST_OFFSET,
     customClass: 'pam-mp4-notification pam-mp4-notification--throttled',
     message: h('div', { class: 'pam-mp4-toast pam-mp4-toast--throttled', role: 'alert',
-      
+
     }, [
       h('div', { class: 'pam-mp4-toast-header' }, [
         h('span', { class: 'pam-mp4-toast-icon', 'aria-hidden': 'true' }, '!'),
@@ -300,12 +300,12 @@ const ReplayNotice = defineComponent({
       const cancelled = state.status === 'cancelled'
       const failed = state.status === 'failed'
       const complete = success || cancelled || failed
-      const original = state.kind === 'original' 
+      const original = state.kind === 'original'
       const phase = success ? copy('Hoàn tất', 'Complete') : copy(...(stages[state.stage] || stages.queued))
       // Number of parts is intentionally not shown for either protocol.
       const percent = success ? 100 : Math.floor(state.visualPercent || 0)
       return h('div', { class: [
-        'pam-mp4-toast', failed ? 'pam-mp4-toast--error' : complete ? `pam-mp4-toast--${state.status}` : 'pam-mp4-toast--processing' 
+        'pam-mp4-toast', failed ? 'pam-mp4-toast--error' : complete ? `pam-mp4-toast--${state.status}` : 'pam-mp4-toast--processing'
       ], role: 'status', 'aria-live': 'polite' }, [
         h('div', { class: 'pam-mp4-toast-header' }, [
           h('span', { class: 'pam-mp4-toast-icon', 'aria-hidden': 'true' }, success ? '✓' : cancelled ? '✓' : failed ? '!' : 'i'),
