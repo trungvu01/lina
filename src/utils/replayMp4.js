@@ -3,14 +3,15 @@
 // server's polling lease handles unexpected browser termination.
 import { defineComponent, h, reactive , TransitionGroup, render, markRaw } from 'vue'
 import request from '@/utils/request'
-import { addBasePath, download } from '@/utils/common/index'
+import { addBasePath } from '@/utils/common/index'
 import { ElMessage } from 'element-plus'
 import i18n from '@/i18n/i18n'
 import './replayMp4.css'
 import { publishPamMp4, subscribePamMp4 } from './pamMp4Sync'
 
+// PAM MP4 V14 - Long Recording Support and native browser download.
 const POLL_INTERVAL_MS = 5000
-const MAX_WAIT_MS = 2.5 * 60 * 60 * 1000
+const MAX_WAIT_MS = 9 * 60 * 60 * 1000
 const SUCCESS_DURATION_MS = 5000
 // Element Plus adds a 16px gap. offset=40 yields actual top=56px.
 const TOAST_OFFSET = 40
@@ -662,7 +663,12 @@ export function downloadReplayMp4(row) {
           activeJobs.delete(key) // do not cancel on browser Save-As/pagehide
           const separator = query ? '&' : '?'
           const url = `${base}download/${query}${separator}job_id=${encodeURIComponent(started.job_id)}`
-          download(addBasePath(url))
+          const link = document.createElement('a')
+          link.href = addBasePath(url)
+          link.rel = 'noopener'
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
           state.status = 'success'
           publishOwnedState(key, id, oid, started.job_id, state, 'ready')
           state.percent = 100
