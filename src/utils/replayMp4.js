@@ -302,11 +302,15 @@ const ReplayNotice = defineComponent({
       const failed = state.status === 'failed'
       const complete = success || cancelled || failed
       const original = state.kind === 'original'
-      const phase = success ? copy('Hoàn tất', 'Complete') : copy(...(stages[state.stage] || stages.queued))
+      const ready = !complete && state.stage === 'ready'
+      const phase = success || ready
+        ? copy('Hoàn tất', 'Complete')
+        : copy(...(stages[state.stage] || stages.queued))
       // Number of parts is intentionally not shown for either protocol.
       const percent = success ? 100 : Math.floor(state.visualPercent || 0)
       return h('div', { class: [
-        'pam-mp4-toast', failed ? 'pam-mp4-toast--error' : complete ? `pam-mp4-toast--${state.status}` : 'pam-mp4-toast--processing'
+        'pam-mp4-toast', failed ? 'pam-mp4-toast--error' : complete ? `pam-mp4-toast--${state.status}` : 'pam-mp4-toast--processing',
+        ready ? 'pam-mp4-toast--ready' : ''
       ], role: 'status', 'aria-live': 'polite' }, [
         h('div', { class: 'pam-mp4-toast-header' }, [
           h('span', { class: 'pam-mp4-toast-icon', 'aria-hidden': 'true' }, success ? '✓' : cancelled ? '✓' : failed ? '!' : 'i'),
@@ -457,6 +461,7 @@ function publishOwnedState(key, sessionId, orgId, jobId, state, status = 'proces
   publishPamMp4(packet)
 }
 function applyRemoteState(entry, packet) {
+  if (entry.state.stage === 'ready' && packet.status === 'processing') return
   const state = entry.state
   if (state.status !== 'processing' && packet.status === 'processing') return
   state.record = String(packet.record || state.record).slice(0, 255)
@@ -475,13 +480,30 @@ function applyRemoteState(entry, packet) {
     state.total = total
     state.visualPercent = Math.min(98, Math.max(state.visualPercent, Number(packet.percent) || 0))
   } else {
-    state.status = packet.status === 'ready' ? 'success' : packet.status === 'cancelled' ? 'cancelled' : 'failed'
-    state.stage = packet.status
-    state.cancelling = false
-    if (packet.status === 'ready') state.visualPercent = 100
     window.clearInterval(entry.animation)
-    armToastDismiss(entry.notice)
-    window.setTimeout(() => trustedRemoteJobs.delete(entry.id), 120000)
+
+    const finish = () => {
+      state.status = packet.status === 'ready' ? 'success' : packet.status === 'cancelled' ? 'cancelled' : 'failed'
+      state.stage = packet.status
+      state.cancelling = false
+      armToastDismiss(entry.notice)
+      window.setTimeout(() => trustedRemoteJobs.delete(entry.id), 120000)
+    }
+
+    if (packet.status === 'ready') {
+      if (state.status !== 'processing' || state.stage === 'ready') return
+
+      state.stage = 'ready'
+      state.cancelling = false
+      state.percent = 100
+      state.visualPercent = 100
+
+      window.setTimeout(() => {
+        if (state.status === 'processing' && state.stage === 'ready') finish()
+      }, 1200)
+    } else {
+      finish()
+    }
   }
 }
 async function receiveMp4Sync(packet) {
@@ -519,7 +541,7 @@ async function receiveMp4Sync(packet) {
       cancelling: false, cancel: null, dismiss: null, progressStepAt: Date.now(), progressStepKey: '' })
     // The mirrored Cancel uses the authenticated Core endpoint directly.
     state.cancel = async () => {
-      if (state.cancelling || state.status !== 'processing') return
+      if (state.cancelling || state.stage === 'ready' || state.status !== 'processing') return
       state.cancelling = true
       state.stage = 'cancelling'
       try {
@@ -533,7 +555,7 @@ async function receiveMp4Sync(packet) {
     }
     const notice = unifiedToast(state)
     const animation = window.setInterval(() => {
-      if (state.status !== 'processing' || state.cancelling) return
+      if (state.status !== 'processing' || state.cancelling || state.stage === 'ready') return
       const target = rdpEstimatedTarget(state.stage, state.current, state.total,
         (Date.now() - state.progressStepAt) / 1000)
       if (target !== null) state.visualPercent = Math.min(98,
@@ -609,7 +631,7 @@ export function downloadReplayMp4(row) {
     const timer = window.setTimeout(() => { if (!finished) ensureNotice() }, 450)
     // Both protocols use the same visual estimator. No extra status polling.
     const progressAnimation = window.setInterval(() => {
-      if (finished || state.cancelling || state.status !== 'processing') return
+      if (finished || state.cancelling || state.stage === 'ready' || state.status !== 'processing') return
       const elapsed = (Date.now() - state.progressStepAt) / 1000
       const target = rdpEstimatedTarget(state.stage, state.current, state.total, elapsed)
       if (target == null) return
@@ -617,7 +639,7 @@ export function downloadReplayMp4(row) {
       state.visualPercent = Math.min(98, state.visualPercent + Math.min(1.4, difference * 0.12))
     }, 350)
     state.cancel = async () => {
-      if (state.cancelling || finished) return
+      if (state.cancelling || finished || state.stage === 'ready') return
       if (!started?.job_id) {
         state.cancelling = true
         earlyCancelRequested = true
@@ -661,6 +683,17 @@ export function downloadReplayMp4(row) {
         }
         if (result.status === 'ready') {
           activeJobs.delete(key) // do not cancel on browser Save-As/pagehide
+          // PAM MP4 V15 Final - show 100% before downloading.
+          state.stage = 'ready'
+          state.cancelling = false
+          state.percent = 100
+          state.visualPercent = 100
+          window.clearInterval(progressAnimation)
+          ensureNotice()
+          publishOwnedState(key, id, oid, started.job_id, state, 'ready')
+
+          await new Promise(resolve => window.setTimeout(resolve, 1200))
+
           const separator = query ? '&' : '?'
           const url = `${base}download/${query}${separator}job_id=${encodeURIComponent(started.job_id)}`
           const link = document.createElement('a')
@@ -670,9 +703,6 @@ export function downloadReplayMp4(row) {
           link.click()
           link.remove()
           state.status = 'success'
-          publishOwnedState(key, id, oid, started.job_id, state, 'ready')
-          state.percent = 100
-          state.visualPercent = 100
           succeeded = true
           finished = true
           ensureNotice()

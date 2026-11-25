@@ -4,12 +4,17 @@
     :extra-more-actions="extraMoreActions"
     :url="url"
     :columns-meta="columnsMeta"
+    :columns-show="columnsShow"
     :columns-exclude="columnsExclude"
   />
 </template>
 
 <script>
 import BaseList from './BaseList'
+import {
+  formatSessionDuration,
+  formatReplayDuration
+} from '@/utils/auditDuration'
 import { addBasePath, download } from '@/utils/common/index'
 import { downloadReplayMp4, notifyOriginalReplayDownload, notifyBulkDownloadBlocked } from '@/utils/replayMp4'
 
@@ -72,8 +77,34 @@ export default {
           }
         }
       ],
+      // PAM MP4 V15 - Audit Duration Enhancement.
+      columnsShow: {
+        min: ['number', 'actions'],
+        default: [
+          'number', 'user', 'asset', 'account', 'protocol',
+          'date_start', 'duration', 'replay_duration_ms', 'actions'
+        ]
+      },
       columnsExclude: ['has_command'],
       columnsMeta: {
+        duration: {
+          label: this.$t('PamSessionDuration'),
+          helpTip: this.$t('PamSessionDurationHelp'),
+          minWidth: '145px',
+          sortable: false,
+          formatter: row => formatSessionDuration(
+            row, key => this.$t(key)
+          )
+        },
+        replay_duration_ms: {
+          label: this.$t('PamReplayDuration'),
+          helpTip: this.$t('PamReplayDurationHelp'),
+          minWidth: '145px',
+          sortable: false,
+          formatter: row => formatReplayDuration(
+            row, key => this.$t(key)
+          )
+        },
         command_amount: {
           label: this.$t('CommandsTotal')
         }

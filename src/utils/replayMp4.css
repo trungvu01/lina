@@ -269,3 +269,16 @@
 #pam-replay-toast-host .pam-mp4-notification--unified:has(.pam-mp4-toast--error) {
   --mp4-bg: #fff1f2; --mp4-border: #fecdd3; --mp4-accent: #dc2626;
 }
+
+
+/* PAM MP4 V15 Final: confirmed completion before download. */
+.pam-mp4-toast--ready .pam-mp4-fill {
+  background: #16a34a;
+}
+.pam-mp4-toast--ready .pam-mp4-fill::after {
+  animation: none;
+  display: none;
+}
+.pam-mp4-toast--ready .pam-mp4-cancel {
+  display: none;
+}

@@ -14,7 +14,10 @@
           :label="item.key"
           class="el-form-item"
         >
-          <span class="el-form-item__label"> {{ formateLabel(item.key) }}</span>
+          <span
+            class="el-form-item__label"
+            :title="item.tooltip"
+          >{{ formateLabel(item.key) }}</span>
           <div class="item-value el-form-item__content">
             <component
               v-bind="{ ...item }"

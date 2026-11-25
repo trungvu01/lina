@@ -57,7 +57,12 @@ export default {
       detailDrawer: () => import('../SessionDetail/index.vue'),
       tableConfig: {
         url: this.url,
-        columnsExclude: ['terminal', ...this.columnsExclude],
+        columnsExclude: [
+          'terminal',
+          ...this.columnsExclude,
+          ...(this.columnsShow.default?.includes('replay_duration_ms')
+            ? [] : ['replay_duration_ms'])
+        ],
         columnsAdd: ['number'],
         columnsShow: this.columnsShow,
         columnsMeta: {

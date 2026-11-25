@@ -12,6 +12,10 @@ import DetailCard from '@/components/Cards/DetailCard/index'
 import { QuickActions } from '@/components'
 import { terminateSession } from '@/api/sessions'
 import { toSafeLocalDateStr } from '@/composables/useDateTime'
+import {
+  formatSessionDuration,
+  formatReplayDuration
+} from '@/utils/auditDuration'
 import TwoCol from '@/layout/components/Page/TwoColPage.vue'
 import { downloadReplayMp4, notifyOriginalReplayDownload } from '@/utils/replayMp4'
 
@@ -152,6 +156,22 @@ export default {
         {
           key: this.$t('DateEnd'),
           value: this.session.date_end ? toSafeLocalDateStr(this.session.date_end) : ''
+        },
+        {
+          key: this.$t('PamSessionDuration'),
+          has: this.session.is_finished === true,
+          tooltip: this.$t('PamSessionDurationHelp'),
+          value: formatSessionDuration(
+            this.session, key => this.$t(key)
+          )
+        },
+        {
+          key: this.$t('PamReplayDuration'),
+          has: this.session.is_finished === true,
+          tooltip: this.$t('PamReplayDurationHelp'),
+          value: formatReplayDuration(
+            this.session, key => this.$t(key)
+          )
         }
       ]
     },

@@ -1,4 +1,11 @@
 {
+  "PamSessionDuration": "Thời lượng phiên",
+  "PamReplayDuration": "Thời lượng bản ghi",
+  "PamReplayDurationUnknown": "Chưa xác định",
+  "PamReplayDurationUnavailable": "Không có",
+  "PamDurationLessThanSecond": "< 1 giây",
+  "PamSessionDurationHelp": "Tổng thời gian từ lúc bắt đầu đến khi kết thúc phiên, bao gồm thời gian không hoạt động.",
+  "PamReplayDurationHelp": "Tổng thời lượng bản ghi, bao gồm khoảng nghỉ được giữ lại giữa các phần bản ghi. Có thể khác thời lượng phiên.",
   "AppNotificationEventCode": "Mã sự kiện",
   "ApplicationActivityLogs": "Nhật ký hoạt động",
   "ApplicationActivityDetail": "Chi tiết hoạt động",

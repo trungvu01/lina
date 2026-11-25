@@ -1,4 +1,11 @@
 {
+  "PamSessionDuration": "Session Duration",
+  "PamReplayDuration": "Replay Duration",
+  "PamReplayDurationUnknown": "Unknown",
+  "PamReplayDurationUnavailable": "N/A",
+  "PamDurationLessThanSecond": "< 1s",
+  "PamSessionDurationHelp": "Total elapsed time between session start and session end, including idle time.",
+  "PamReplayDurationHelp": "Total recorded timeline, including gaps preserved between recording parts. It may differ from the session duration.",
   "ApplicationActivityLogs": "Activity logs",
   "ApplicationActivityDetail": "Activity details",
   "ApplicationActivityType": "Activity type",
