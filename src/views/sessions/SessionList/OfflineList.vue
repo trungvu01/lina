@@ -11,6 +11,7 @@
 <script>
 import BaseList from './BaseList'
 import { addBasePath, download } from '@/utils/common/index'
+import { downloadReplayMp4, notifyOriginalReplayDownload, notifyBulkDownloadBlocked } from '@/utils/replayMp4'
 
 const DOWNLOAD_INTERVAL = 300
 
@@ -62,8 +63,12 @@ export default {
           type: 'primary',
           can: ({ row }) => vm.canDownloadReplay(row),
           callback: function ({ row, tableData }) {
-            // 跳转下载页面
-            download(`/api/v1/terminal/sessions/${row.id}/replay/download/`)
+            if (['ssh', 'rdp'].includes(row.protocol)) {
+              downloadReplayMp4(row).catch(() => {})
+            } else {
+              notifyOriginalReplayDownload(row, () =>
+                download(`/api/v1/terminal/sessions/${row.id}/replay/download/`))
+            }
           }
         }
       ],
@@ -81,6 +86,10 @@ export default {
       return this.hasPerms(row, 'download') && !isUnsupportedMongoDB
     },
     async downloadSelectedReplays(selectedRows) {
+      if (selectedRows.length > 1) {
+        notifyBulkDownloadBlocked()
+        return
+      }
       const downloadableRows = selectedRows.filter((row) => this.canDownloadReplay(row))
       const unavailableCount = selectedRows.length - downloadableRows.length
 
@@ -106,7 +115,12 @@ export default {
       }
 
       for (const [index, row] of downloadableRows.entries()) {
-        download(`/api/v1/terminal/sessions/${row.id}/replay/download/`)
+        if (['ssh', 'rdp'].includes(row.protocol)) {
+          await downloadReplayMp4(row).catch(() => {})
+        } else {
+          notifyOriginalReplayDownload(row, () =>
+            download(`/api/v1/terminal/sessions/${row.id}/replay/download/`))
+        }
         if (index < downloadableRows.length - 1) {
           await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_INTERVAL))
         }

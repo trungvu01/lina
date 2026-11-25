@@ -13,6 +13,7 @@ import { QuickActions } from '@/components'
 import { terminateSession } from '@/api/sessions'
 import { toSafeLocalDateStr } from '@/composables/useDateTime'
 import TwoCol from '@/layout/components/Page/TwoColPage.vue'
+import { downloadReplayMp4, notifyOriginalReplayDownload } from '@/utils/replayMp4'
 
 export default {
   name: 'SessionDetailInfo',
@@ -108,7 +109,11 @@ export default {
             click: function () {
               const oid = vm.session.org_id || ''
               const downloadUrl = `/api/v1/terminal/sessions/${vm.session.id}/replay/download/${oid ? '?oid=' + oid : ''}`
-              window.open(downloadUrl)
+              if (['ssh', 'rdp'].includes(vm.session.protocol)) {
+                downloadReplayMp4(vm.session).catch(() => {})
+              } else {
+                notifyOriginalReplayDownload(vm.session, () => window.open(downloadUrl))
+              }
             }
           }
         }

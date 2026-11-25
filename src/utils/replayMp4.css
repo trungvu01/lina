@@ -1,0 +1,271 @@
+/* Compact, accessible Element Plus toast; retain the original Download button. */
+.el-notification.pam-mp4-notification {
+  box-sizing: border-box;
+  width: min(385px, calc(100vw - 20px));
+  padding: 13px 15px;
+  border: 1px solid var(--mp4-border, #bfdbfe);
+  border-left: 3px solid var(--mp4-accent, #2563eb);
+  border-radius: 12px;
+  background: var(--mp4-bg, #eff6ff);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .10);
+  transition: background-color .25s ease, border-color .25s ease;
+}
+/* Info blue throughout; yellow is reserved exclusively for the live progress. */
+.el-notification.pam-mp4-notification--unified:has(.pam-mp4-toast--processing) {
+  --mp4-bg: #eff6ff;
+  --mp4-border: #bfdbfe;
+  --mp4-accent: #2563eb;
+  --mp4-track: #dbeafe;
+  --mp4-fill: #eab308;
+}
+.el-notification.pam-mp4-notification--unified:has(.pam-mp4-toast--success) {
+  --mp4-bg: #ecfdf5;
+  --mp4-border: #a7f3d0;
+  --mp4-accent: #059669;
+  --mp4-track: #d1fae5;
+  --mp4-fill: #16a34a;
+}
+.el-notification.pam-mp4-notification--error {
+  --mp4-bg: #fff1f2;
+  --mp4-border: #fecdd3;
+  --mp4-accent: #dc2626;
+}
+.pam-mp4-notification .el-notification__group { min-width: 0; margin-left: 0; flex: 1; }
+.pam-mp4-notification .el-notification__content { margin: 0; }
+.pam-mp4-notification .el-notification__content p { margin: 0; }
+.pam-mp4-notification .el-notification__closeBtn { top: 11px; right: 11px; color: #64748b; }
+.pam-mp4-toast { display: grid; gap: 10px; color: #334155; text-align: left; }
+.pam-mp4-toast-header { display: flex; align-items: flex-start; gap: 10px; padding-right: 14px; }
+.pam-mp4-toast-icon {
+  flex: 0 0 24px; width: 24px; height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-size: 15px; font-weight: 750;
+  background: #dbeafe; color: #2563eb;
+}
+.pam-mp4-toast--success .pam-mp4-toast-icon { background: #d1fae5; color: #047857; }
+.pam-mp4-toast--error .pam-mp4-toast-icon { background: #fee2e2; color: #b91c1c; }
+.pam-mp4-toast-heading { min-width: 0; display: grid; gap: 3px; }
+.pam-mp4-toast-title { font-size: 14px; line-height: 1.35; font-weight: 700; color: #1e3a8a; }
+.pam-mp4-toast--success .pam-mp4-toast-title { color: #065f46; }
+.pam-mp4-toast--error .pam-mp4-toast-title { color: #991b1b; }
+.pam-mp4-toast-copy { font-size: 12px; line-height: 1.4; color: #475569; }
+.pam-mp4-progress-info { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: #475569; align-items: center; }
+.pam-mp4-progress-number { font-size: 12px; font-weight: 750; color: var(--mp4-accent); font-variant-numeric: tabular-nums; }
+.pam-mp4-track { height: 7px; border-radius: 10px; background: var(--mp4-track, #dbeafe); overflow: hidden; }
+.pam-mp4-fill { height: 100%; border-radius: inherit; background: var(--mp4-fill, #eab308); transition: width .35s ease, background-color .2s ease; }
+.pam-mp4-retry { justify-self: start; border: 0; border-radius: 7px; padding: 7px 11px; color: white; background: #dc2626; font-size: 12px; font-weight: 600; cursor: pointer; }
+.pam-mp4-retry:hover { background: #b91c1c; }
+.pam-mp4-retry:focus-visible { outline: 2px solid #fda4af; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .el-notification.pam-mp4-notification, .pam-mp4-fill { transition: none; }
+}
+
+/* v5: use Element Plus transition classes, with a fluid right-to-left entrance
+   and the reverse on dismissal. The top offset is supplied per notification. */
+.el-notification-fade-enter-active.pam-mp4-notification {
+  transition: transform .42s cubic-bezier(.22, 1, .36, 1),
+              opacity .36s ease, background-color .3s ease;
+}
+.el-notification-fade-leave-active.pam-mp4-notification {
+  transition: transform .32s cubic-bezier(.4, 0, 1, 1), opacity .3s ease;
+}
+.el-notification-fade-enter-from.pam-mp4-notification,
+.el-notification-fade-leave-to.pam-mp4-notification {
+  opacity: 0;
+  transform: translate3d(calc(100% + 28px), 0, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .el-notification-fade-enter-active.pam-mp4-notification,
+  .el-notification-fade-leave-active.pam-mp4-notification { transition: none; }
+}
+
+/* v6: show record identity without allowing it to expand the toast. */
+.pam-mp4-record-label {
+  min-width: 0;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: rgba(37, 99, 235, .06);
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.pam-mp4-toast--success .pam-mp4-record-label { background: rgba(5, 150, 105, .07); }
+.pam-mp4-toast--error .pam-mp4-record-label { background: rgba(220, 38, 38, .05); }
+.pam-mp4-cancel {
+  justify-self: start;
+  border: 1px solid #93c5fd;
+  background: #fff;
+  color: #1d4ed8;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 650;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.pam-mp4-cancel:hover:not(:disabled) { background: #dbeafe; }
+.pam-mp4-cancel:disabled { opacity: .58; cursor: wait; }
+.pam-mp4-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.pam-mp4-close:hover { color: #334155; }
+.pam-mp4-close:focus-visible,
+.pam-mp4-cancel:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+/* PAM_MP4_V7: yellow rate-limit toast; animation inherited from V5/V6. */
+.pam-mp4-toast--throttled { color: #92400e; }
+.pam-mp4-notification--throttled.el-notification {
+  background: #fffbeb !important;
+  border: 1px solid #fcd34d !important;
+  border-left: 3px solid #f59e0b !important;
+}
+.pam-mp4-toast--throttled .pam-mp4-toast-icon {
+  background: #fef3c7;
+  color: #b45309;
+}
+.pam-mp4-toast--throttled .pam-mp4-record-label {
+  background: rgba(245, 158, 11, .08);
+  color: #92400e;
+}
+
+/* PAM_MP4_V8: coordinated, accessible stack; replaces independent notification
+   positioning. Do not position each notice fixed or set its own top offset. */
+#pam-replay-toast-host {
+  position: fixed;
+  top: 56px;
+  right: 16px;
+  width: min(385px, calc(100vw - 24px));
+  /* Keep above session table but below Element Plus overlays/drawers/menus. */
+  z-index: 900;
+  pointer-events: none;
+}
+#pam-replay-toast-host .pam-replay-stack-items {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+#pam-replay-toast-host .pam-mp4-notification {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid var(--mp4-border, #bfdbfe);
+  border-left: 3px solid var(--mp4-accent, #2563eb);
+  border-radius: 12px;
+  background: var(--mp4-bg, #eff6ff);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .12);
+  color: #334155;
+  pointer-events: auto;
+  overflow: hidden;
+  transition: background-color .25s ease, border-color .25s ease;
+}
+#pam-replay-toast-host .pam-mp4-notification--unified:has(.pam-mp4-toast--processing) {
+  --mp4-bg: #eff6ff; --mp4-border: #bfdbfe;
+  --mp4-accent: #2563eb; --mp4-track: #dbeafe; --mp4-fill: #eab308;
+}
+#pam-replay-toast-host .pam-mp4-notification--unified:has(.pam-mp4-toast--success) {
+  --mp4-bg: #ecfdf5; --mp4-border: #a7f3d0;
+  --mp4-accent: #059669; --mp4-track: #d1fae5; --mp4-fill: #16a34a;
+}
+#pam-replay-toast-host .pam-mp4-notification--error {
+  --mp4-bg: #fff1f2; --mp4-border: #fecdd3; --mp4-accent: #dc2626;
+}
+#pam-replay-toast-host .pam-mp4-notification--throttled {
+  --mp4-bg: #fffbeb; --mp4-border: #fcd34d; --mp4-accent: #d97706;
+}
+#pam-replay-toast-host .pam-mp4-notification--throttled .pam-mp4-toast-icon {
+  background: #fef3c7;
+  color: #b45309;
+}
+#pam-replay-toast-host .pam-replay-notice-close {
+  position: absolute;
+  top: 11px;
+  right: 12px;
+  padding: 0 3px;
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+}
+#pam-replay-toast-host .pam-replay-notice-close:hover { color: #334155; }
+#pam-replay-toast-host .pam-replay-notice-close:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+/* Vue TransitionGroup FLIP animation: all remaining cards automatically move
+   upward when any card is removed, regardless of which row disappeared. */
+.pam-replay-stack-move {
+  transition: transform .36s cubic-bezier(.22, 1, .36, 1) !important;
+}
+.pam-replay-stack-enter-active {
+  transition: transform .36s cubic-bezier(.22, 1, .36, 1), opacity .32s ease !important;
+}
+.pam-replay-stack-leave-active {
+  position: absolute !important;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  pointer-events: none !important;
+  transition: transform .28s cubic-bezier(.4, 0, 1, 1), opacity .26s ease !important;
+}
+.pam-replay-stack-enter-from,
+.pam-replay-stack-leave-to {
+  opacity: 0;
+  transform: translateX(calc(100% + 32px));
+}
+@media (prefers-reduced-motion: reduce) {
+  .pam-replay-stack-move,
+  .pam-replay-stack-enter-active,
+  .pam-replay-stack-leave-active { transition: none !important; }
+}
+
+/* V12: same moving highlight for SSH and RDP while a job is active.
+   Real worker milestones still govern completion and cancellation. */
+.pam-mp4-toast--processing .pam-mp4-fill { position: relative; overflow: hidden; }
+.pam-mp4-toast--processing .pam-mp4-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.52), transparent);
+  transform: translateX(-100%); animation: pam-rdp-progress-sheen 2.1s ease-in-out infinite;
+}
+@keyframes pam-rdp-progress-sheen { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .pam-mp4-toast--processing .pam-mp4-fill::after { animation: none; }
+}
+
+/* V12: compact cancel acknowledgement, identical in Audits and Luna Player. */
+#pam-replay-toast-host .pam-mp4-notification--unified:has(.pam-mp4-toast--cancelled) {
+  --mp4-bg: #fffbeb;
+  --mp4-border: #fde68a;
+  --mp4-accent: #d97706;
+}
+.pam-mp4-toast--cancelled { gap: 7px; }
+.pam-mp4-toast--cancelled .pam-mp4-toast-icon {
+  background: #fef3c7;
+  color: #b45309;
+}
+.pam-mp4-toast--cancelled .pam-mp4-toast-title { color: #92400e; }
+.pam-mp4-toast--cancelled .pam-mp4-record-label { background: rgba(245, 158, 11, .065); }
+.pam-mp4-toast--cancelled .pam-mp4-toast-copy { color: #78716c; }
+
+/* Mirrored worker failure, unlike local showError(), shares unified toast. */
+#pam-replay-toast-host .pam-mp4-notification--unified:has(.pam-mp4-toast--error) {
+  --mp4-bg: #fff1f2; --mp4-border: #fecdd3; --mp4-accent: #dc2626;
+}
